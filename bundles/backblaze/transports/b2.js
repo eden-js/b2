@@ -46,7 +46,7 @@ class B2Transport extends Daemon {
    */
   url(asset, label) {
     // Return url
-    return `https://f002.backblazeb2.com/file/${config.get('b2.bucket')}/${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`;
+    return `https://${config.get('b2.domain') || 'f002.backblazeb2.com'}/file/${config.get('b2.bucket')}/${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`;
   }
 
   /**
