@@ -92,7 +92,7 @@ class B2Transport extends Daemon {
     }));
 
     // set b2 info
-    asset.set(`${label ? `${label}.` : ''}b2`, data);
+    asset.set(`${label ? `thumbs.${label}.` : ''}b2`, data);
   }
 
   /**
@@ -129,7 +129,7 @@ class B2Transport extends Daemon {
 
     // delete file version
     await this.store.deleteFileVersion({
-      fileId   : asset.get(`${label ? `${label}.` : ''}b2.fileId`),
+      fileId   : asset.get(`${label ? `thumbs.${label}.` : ''}b2.fileId`),
       fileName : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`
     });
   }
