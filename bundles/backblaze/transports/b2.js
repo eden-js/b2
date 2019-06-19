@@ -66,9 +66,6 @@ class B2Transport extends Daemon {
     // Get date
     let date = asset.get('created_at') || new Date();
 
-    // save if no id
-    if (!asset.get('_id')) await asset.save();
-
     // get upload url
     const uploadUrl = await this.store.getUploadUrl({
       bucketId : bucket.data.buckets[0].bucketId,
@@ -78,7 +75,7 @@ class B2Transport extends Daemon {
     date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
     // Set path
-    asset.set('path', `${date}-${asset.get('_id')}`);
+    asset.set('path', `${date}/${asset.get('hash')}`);
 
     // await
     const { data } = (await this.store.uploadFile({
@@ -87,8 +84,8 @@ class B2Transport extends Daemon {
       uploadUrl       : uploadUrl.data.uploadUrl,
       uploadAuthToken : uploadUrl.data.authorizationToken,
       info            : {
-        id  : asset.get('_id'),
-        str : date,
+        str  : date,
+        hash : asset.get('hash'),
       },
       onUploadProgress : (event) => {}, // progress monitoring
       // ...common arguments (optional)
