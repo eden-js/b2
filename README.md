@@ -20,6 +20,9 @@ npm i --save @edenjs/b2
 ### Configure
 
 ```js
+const config = {};
+
+// set b2 config
 config.b2 = {
   id     : '', // backblaze id
   secret : '', // backblaze api key
