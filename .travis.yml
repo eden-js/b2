@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+- '10'
+sudo: false
+install:
+- npm install --only=dev
+- npm ci
+before_script:
+- node node_modules/eslint/bin/eslint.js .
+script:
+- node ./edenconfig.js
+after_script:
+- npm test
+deploy:
+  provider: npm
+  email: alex@edenup.com
+  api_key:
+    secure: YDGNp6MNBAips3jSoRAskrQxmbSqtYCg1cFT7J4kZ3GXxZfoM+DW3OayJalbJTABjlhhTp4pEYIaaeyZW6hsPEYVDtOZWP6KjygG5TkTqZpO9EyUobLdFa2Xr3+BmmxCUdOqrahhnVzMChRsrSyPkQjwLPmDbamjgtz/cPnzrXO1bqioHCAe6Wjk3s+KYt6DtO1GFlkKasNtNgr4ufTLYYkTJSckxWU7IDAp54+P0ocqw0fP2dPnfRHiOizmQ/gOmUN/38vTn2kHLMSMcFzbEARpJUJO93W9CXtixdrswQndSMsBkKcu1U1Nzhx7IKdY/zDIQVOPsXK3CtS2bIavubxK6reXry0eB4it5uSLgczn2OJTBmg0+hco/dEM6odIBGE0B5AaTOrRTFBt5sqEimX0m0+nzeH8cut39Qn7D/l3Vy54GxTn3b6586dagqoRbmEFiKXT9b+/tzxzubrVjStMIS653giMyh+pO/EMaf0e54g+E5UqNgnn80jrGk3M3jtvYICOYM85nDk1fHhHnSnu3VOWvGkhRttiDLB4i63zoi0hSvuguPiSdoYAdF4PmPG7KeLfaliR32FjjLAaXej6ulShlAoWGmAaNfaCTFjNhZ2s5OMyr0UbMz6m32rCkJL5ncuu1FliZ/j0uHh2uelk4xI7G8SEZBCEdCxp1O0=
+  on:
+    tags: true
+    repo: eden-js/b2
