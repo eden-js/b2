@@ -87,7 +87,7 @@ class B2Transport extends Daemon {
         str  : date,
         hash : asset.get('hash'),
       },
-      onUploadProgress : (event) => {}, // progress monitoring
+      onUploadProgress : () => {}, // progress monitoring
       // ...common arguments (optional)
     }));
 
@@ -130,7 +130,7 @@ class B2Transport extends Daemon {
     // delete file version
     await this.store.deleteFileVersion({
       fileId   : asset.get(`${label ? `thumbs.${label}.` : ''}b2.fileId`),
-      fileName : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`
+      fileName : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`,
     });
   }
 }

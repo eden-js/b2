@@ -1,7 +1,6 @@
 
 // Require dependencies
 const Daemon = require('daemon');
-const config = require('config');
 
 // Require transport
 const B2Transport = require('backblaze/transports/b2');
