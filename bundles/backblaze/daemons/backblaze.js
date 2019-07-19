@@ -20,7 +20,7 @@ class BackblazeDaemon extends Daemon {
     super(...args);
 
     // Register transport
-    this.eden.register('asset.transport', new B2Transport());
+    this.eden.register('asset.transport.b2', new B2Transport());
   }
 }
 
