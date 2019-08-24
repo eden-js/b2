@@ -22,6 +22,9 @@ class B2Transport extends Daemon {
     this.store = new Store({
       accountId      : config.get('b2.id'), // or accountId
       applicationKey : config.get('b2.secret'), // or masterApplicationKey
+      retry          : {
+        retries : config.get('b2.retries') || 8,
+      },
     });
 
     // Get bucket
