@@ -104,8 +104,8 @@ class B2Transport extends Daemon {
     // await
     const { data } = await this._safeExec(async () => {
       return await this.store.uploadFile({
+        fileName,
         data            : await fs.readFile(tmp), // this is expecting a Buffer, not an encoded string
-        fileName        : fileName,
         uploadUrl       : uploadUrl.data.uploadUrl,
         uploadAuthToken : uploadUrl.data.authorizationToken,
         info            : {
