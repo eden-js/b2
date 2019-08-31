@@ -27,16 +27,33 @@ class B2Transport extends Daemon {
       },
     });
 
-    // Get bucket
+    this._setBucket();
+  }
+
+  async _setBucket() {
     this.bucket = new Promise(async (res) => {
-      // authorize
       await this.store.authorize();
 
-      // resolve got bucket
       res(await this.store.getBucket({
         bucketName : config.get('b2.bucket'),
       }));
     });
+
+    // so re-calls to this method can know the process has finished
+    await this.bucket;
+  }
+
+  async _safeExec(cb, times = 0) {
+    try {
+      return await cb();
+    } catch (err) {
+      if (err.response.status === 401 && times < (config.get('b2.authRetries') || 5)) {
+        await this._setBucket();
+        return await this._safeExec(cb, times + 1); 
+      } else {
+        throw err;
+      }
+    }
   }
 
   /**
@@ -70,9 +87,11 @@ class B2Transport extends Daemon {
     let date = asset.get('created_at') || new Date();
 
     // get upload url
-    const uploadUrl = await this.store.getUploadUrl({
-      bucketId : bucket.data.buckets[0].bucketId,
-    });
+    const uploadUrl = await this._safeExec(async () => {
+      return await this.store.getUploadUrl({
+        bucketId : bucket.data.buckets[0].bucketId,
+      });
+    })
 
     // Augment date
     date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -81,18 +100,19 @@ class B2Transport extends Daemon {
     asset.set('path', `${date}/${asset.get('hash')}`);
 
     // await
-    const { data } = (await this.store.uploadFile({
-      data            : await fs.readFile(tmp), // this is expecting a Buffer, not an encoded string
-      fileName        : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`,
-      uploadUrl       : uploadUrl.data.uploadUrl,
-      uploadAuthToken : uploadUrl.data.authorizationToken,
-      info            : {
-        str  : date,
-        hash : asset.get('hash'),
-      },
-      onUploadProgress : () => {}, // progress monitoring
-      // ...common arguments (optional)
-    }));
+    const { data } = await this._safeExec(async () => {
+      return await this.store.uploadFile({
+        data            : await fs.readFile(tmp), // this is expecting a Buffer, not an encoded string
+        fileName        : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`,
+        uploadUrl       : uploadUrl.data.uploadUrl,
+        uploadAuthToken : uploadUrl.data.authorizationToken,
+        info            : {
+          str  : date,
+          hash : asset.get('hash'),
+        },
+        onUploadProgress : () => {},
+      });
+    });
 
     // set b2 info
     asset.set(`${label ? `thumbs.${label}.` : ''}b2`, data);
@@ -131,9 +151,11 @@ class B2Transport extends Daemon {
     await this.bucket;
 
     // delete file version
-    await this.store.deleteFileVersion({
-      fileId   : asset.get(`${label ? `thumbs.${label}.` : ''}b2.fileId`),
-      fileName : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`,
+    await this._safeExec(async () => {
+      return await this.store.deleteFileVersion({
+        fileId   : asset.get(`${label ? `thumbs.${label}.` : ''}b2.fileId`),
+        fileName : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`,
+      });
     });
   }
 }
