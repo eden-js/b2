@@ -49,10 +49,10 @@ class B2Transport extends Daemon {
     } catch (err) {
       if (err.response.status === 401 && times < (config.get('b2.authRetries') || 5)) {
         await this._setBucket();
-        return await this._safeExec(cb, times + 1); 
-      } else {
-        throw err;
+        return await this._safeExec(cb, times + 1);
       }
+
+      throw err;
     }
   }
 
@@ -91,7 +91,7 @@ class B2Transport extends Daemon {
       return await this.store.getUploadUrl({
         bucketId : bucket.data.buckets[0].bucketId,
       });
-    })
+    });
 
     // Augment date
     date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -99,11 +99,13 @@ class B2Transport extends Daemon {
     // Set path
     asset.set('path', `${date}/${asset.get('hash')}`);
 
+    const fileName = `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`;
+
     // await
     const { data } = await this._safeExec(async () => {
       return await this.store.uploadFile({
         data            : await fs.readFile(tmp), // this is expecting a Buffer, not an encoded string
-        fileName        : `${asset.get('path')}/${label ? `${label}.${asset.get(`thumbs.${label}.ext`)}` : `full.${asset.get('ext')}`}`,
+        fileName        : fileName,
         uploadUrl       : uploadUrl.data.uploadUrl,
         uploadAuthToken : uploadUrl.data.authorizationToken,
         info            : {
